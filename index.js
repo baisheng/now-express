@@ -3,29 +3,95 @@ const app = express();
 const Pageres = require('pageres');
 // const captureWebsite  = require('capture-website')
 const port = 5000;
-
+const parse = require('url');
+const { getScreenshot } = require('./chromium');
+const { getInt, getUrlFromPath, isValidUrl } = require('./validator');
+const got = require('got');
+const cheerio = require('cheerio')
 // Body parser
 app.use(express.urlencoded({ extended: false }));
+const Readability = require('readability')
+const JSDOM = require("jsdom").JSDOM;
+const requestPromise = require("request-promise-native");
+const read = require('read-art')
+// import htmlMetadata from 'html-metadata';
+const parseDublinCore = require('html-metadata').parseDublinCore;
+const htmlMetadata = require('html-metadata')
+/**
+ * Gets the self full URL from the request
+ *
+ * @param {object} req Request
+ * @returns {string} URL
+ */
+const getFullUrl = (req) => `${req.protocol}://${req.headers.host}${req.originalUrl}`;
 
+function fullUrl(req) {
+  return parse.format({
+    protocol: req.protocol,
+    host: req.get('host'),
+    pathname: req.originalUrl
+  });
+}
+app.get("*", async (req, res) => {
+  console.log('s0s0s0s0')
+  console.log(req.originalUrl)
+
+  try{
+    const targetUrl = getUrlFromPath(req.originalUrl)
+    if (!isValidUrl(targetUrl)) {
+      res.statusCode = 400;
+      res.setHeader('Content-Type', 'text/html');
+      res.end(`<h1>Bad Request</h1><p>The url <em>${targetUrl}</em> is not valid.</p>`);
+    }
+
+    else {
+
+      const metascraper = require('metascraper')([
+        require('metascraper-author')(),
+        require('metascraper-date')(),
+        require('metascraper-description')(),
+        require('metascraper-image')(),
+        require('metascraper-logo')(),
+        require('metascraper-clearbit')(),
+        require('metascraper-publisher')(),
+        require('metascraper-title')(),
+        require('metascraper-url')(),
+        // require('metascraper-readability')()
+      ])
+      const got = require('got')
+      const { body: html, url } = await got(targetUrl, {
+        retry: 10
+      })
+      const metadata = await metascraper({ html, url })
+      // console.log(metadata)
+      // console.log(    metascraper.readability)
+      const Readability = require('readability')
+      const jsdom = require('jsdom')
+
+      const { JSDOM, VirtualConsole } = jsdom
+
+      // const readability = memoizeOne(($, url) => {
+      const $ = cheerio.load(html)
+      const dom = new JSDOM($.html(), { url, virtualConsole: new VirtualConsole() })
+      const reader = new Readability(dom.window.document)
+      const content = await reader.parse()
+      // })
+      const json = {
+        ...metadata,
+        readability: {
+          ...content
+        }
+      }
+      res.setHeader('Content-Type', 'text/json');
+      res.end(JSON.stringify(json))
+    }
+  } catch (error) {
+    console.log(error)
+    // console.log(error.response.body);
+    //=> 'Internal server error ...'
+  }
+})
 // Home route
-app.get("/", async (req, res) => {
-  // const screenshot = await captureWebsite.buffer('https://zcool.com.cn', 'screenshot.png', {
-  //   emulateDevice: 'iPhone X'
-  // });
-  const mysceenshot = await new Pageres({ delay: 2 })
-  .src('http://baidu.com', ['1024x768'])
-  .run()
-  // const screenshot = await new Pageres({ delay: 2 })
-  // .src('http://baidu.com', [ '480x320', '1024x768', 'iphone 5s' ], { crop: true })
-  // // .src('https://sindresorhus.com', [ '1280x1024', '1920x1080' ])
-  // // .src('data:text/html,<h1>Awesome!</h1>', [ '1024x768' ])
-  // // .dest(__dirname)
-  // .run();
-  // console.log(mysceenshot)
-  res.contentType('image/jpeg');
-  res.send(mysceenshot[0]);
-  // res.send("Welcome to a basic express App");
-});
 
 // Mock API
 app.get("/users", (req, res) => {
