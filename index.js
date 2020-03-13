@@ -81,22 +81,22 @@ app.get("*", async (req, res) => {
       const metadata = await metascraper({ html, url })
       // console.log(metadata)
       // console.log(    metascraper.readability)
-      const Readability = require('readability')
-      const jsdom = require('jsdom')
-
-      const { JSDOM, VirtualConsole } = jsdom
-
-      // const readability = memoizeOne(($, url) => {
-      const $ = cheerio.load(html)
-      const dom = new JSDOM($.html(), { url, virtualConsole: new VirtualConsole() })
-      const reader = new Readability(dom.window.document)
-      const content = await reader.parse()
+      // const Readability = require('readability')
+      // const jsdom = require('jsdom')
+      //
+      // const { JSDOM, VirtualConsole } = jsdom
+      //
+      // // const readability = memoizeOne(($, url) => {
+      // const $ = cheerio.load(html)
+      // const dom = new JSDOM($.html(), { url, virtualConsole: new VirtualConsole() })
+      // const reader = new Readability(dom.window.document)
+      // const content = await reader.parse()
       // })
       const json = {
         ...metadata,
-        readability: {
-          ...content
-        }
+        // readability: {
+        //   ...content
+        // }
       }
       res.setHeader('Content-Type', 'text/json');
       res.end(JSON.stringify(json))

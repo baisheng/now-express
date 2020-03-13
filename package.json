@@ -15,8 +15,6 @@
     "chrome-aws-lambda": "^2.1.1",
     "express": "^4.17.1",
     "got": "^10.6.0",
-    "html-metadata": "^1.7.1",
-    "jsdom": "^16.2.1",
     "metascraper": "^5.11.6",
     "metascraper-author": "^5.11.6",
     "metascraper-clearbit": "^5.11.6",
