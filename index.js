@@ -13,7 +13,7 @@ app.use(express.urlencoded({ extended: false }));
 // const Readability = require('readability')
 // const JSDOM = require("jsdom").JSDOM;
 // const requestPromise = require("request-promise-native");
-// const read = require('read-art')
+const read = require('read-art')
 // import htmlMetadata from 'html-metadata';
 // const parseDublinCore = require('html-metadata').parseDublinCore;
 // const htmlMetadata = require('html-metadata')
@@ -33,9 +33,6 @@ function fullUrl(req) {
   });
 }
 app.get("*", async (req, res) => {
-  console.log('s0s0s0s0')
-  console.log(req.originalUrl)
-
   try{
    // const targetUrl = 'http://www.bloomberg.com/news/articles/2016-05-24/as-zenefits-stumbles-gusto-goes-head-on-by-selling-insurance'
    //  console.log(req.url)
